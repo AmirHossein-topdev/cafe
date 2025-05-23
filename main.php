@@ -100,13 +100,13 @@ if ($tableId > 0) {
                                                     ">
                                                 مشاهده بیشتر>
                                             </h6>
-
                                             <p class="card-text">
                                                 <?= htmlspecialchars(number_format($post['price'])) ?> تومان
                                             </p>
                                             <button class="btn btn-sm add-to-cart text-white" id="playButton"
                                                 style="background-color:#3F545A;" data-post-id="<?= $post['id'] ?>"
-                                                data-stock="<?= $post['stock'] ?>">
+                                                data-stock="<?= $post['stock'] ?>"
+                                                data-is-stock-tracked="<?= $post['is_stock_tracked'] ?>">
                                                 افزودن به سبد
                                             </button>
                                         </div>
