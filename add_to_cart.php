@@ -43,7 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insertStmt->execute([$postId, $post['title'], $quantity, $tableId, $post['price']]);
         }
 
+        // 🚨 کاهش موجودی محصول
+        $newStock = $post['stock'] - $quantity;
+        $stockStmt = $db->prepare("UPDATE posts SET stock = ? WHERE id = ?");
+        $stockStmt->execute([$newStock, $postId]);
+
         echo json_encode(['status' => 'success']);
+
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Post not found']);
     }
