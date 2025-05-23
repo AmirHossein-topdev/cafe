@@ -36,18 +36,20 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
         <!-- Sidebar Section -->
         <?php
         include "./include/layout/sidebar.php"
-        ?>
+            ?>
 
         <!-- Main Section -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="fs-3 fw-bold">داشبورد</h1>
             </div>
 
             <!-- Recently Posts -->
             <div class="mt-4">
                 <h4 class="text-secondary fw-bold">محصولات اخیر</h4>
-                <?php if ($posts->rowCount() > 0) : ?>
+                <?php if ($posts->rowCount() > 0): ?>
+                    <?php $index = 1; ?>
                     <div class="table-responsive small">
                         <table class="table table-hover align-middle">
                             <thead>
@@ -59,21 +61,22 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($posts as $post) : ?>
+                                <?php foreach ($posts as $post): ?>
                                     <tr>
-                                        <th><?= $post['id'] ?></th>
+                                        <th><?= $index++ ?></th>
                                         <td><?= $post['title'] ?></td>
                                         <td><?= $post['price'] ?></td>
                                         <td>
                                             <a href="#" class="btn btn-sm btn-outline-dark">ویرایش</a>
-                                            <a href="index.php?entity=post&action=delete&id=<?= $post['id'] ?>" class="btn btn-sm btn-outline-danger">حذف</a>
+                                            <a href="index.php?entity=post&action=delete&id=<?= $post['id'] ?>"
+                                                class="btn btn-sm btn-outline-danger">حذف</a>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
                         </table>
                     </div>
-                <?php else : ?>
+                <?php else: ?>
                     <div class="col">
                         <div class="alert alert-danger">
                             محصول ای یافت نشد ....
@@ -85,7 +88,8 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
             <!-- Categories -->
             <div class="mt-4">
                 <h4 class="text-secondary fw-bold">دسته بندی</h4>
-                <?php if ($categories->rowCount() > 0) : ?>
+                <?php if ($categories->rowCount() > 0): ?>
+                    <?php $index = 1; ?>
                     <div class="table-responsive small">
                         <table class="table table-hover align-middle">
                             <thead>
@@ -97,21 +101,22 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($categories as $category) : ?>
+                                <?php foreach ($categories as $category): ?>
                                     <tr>
-                                        <th><?= $category['id'] ?></th>
+                                        <th><?= $index++ ?></th>
                                         <td><?= $category['title'] ?></td>
                                         <td><?= $category['alt'] ?></td>
                                         <td>
                                             <a href="#" class="btn btn-sm btn-outline-dark">ویرایش</a>
-                                            <a href="index.php?entity=category&action=delete&id=<?= $category['id'] ?>" class="btn btn-sm btn-outline-danger">حذف</a>
+                                            <a href="index.php?entity=category&action=delete&id=<?= $category['id'] ?>"
+                                                class="btn btn-sm btn-outline-danger">حذف</a>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
                         </table>
                     </div>
-                <?php else : ?>
+                <?php else: ?>
                     <div class="col">
                         <div class="alert alert-danger">
                             دسته بندی یافت نشد ....
@@ -124,19 +129,21 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
             <div class="mt-4 container">
                 <h4 class="text-secondary fw-bold mb-3">اسلاید ها</h4>
                 <div class="row justify-content-center">
-                    <?php if ($slides->rowCount() > 0) : ?>
-                        <?php foreach ($slides as $slide) : ?>
+                    <?php if ($slides->rowCount() > 0): ?>
+                        <?php foreach ($slides as $slide): ?>
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
                                 <div class="card text-center" style="height:16rem;">
-                                    <img src="../uploads/slides/<?= htmlspecialchars($slide['image']) ?>" class="card-img-top" style="height: 10rem;" alt="slide-img">
+                                    <img src="../uploads/slides/<?= htmlspecialchars($slide['image']) ?>" class="card-img-top"
+                                        style="height: 10rem;" alt="slide-img">
                                     <div class="card-body">
                                         <h5 class="card-title"><?= $slide['slide_name'] ?></h5>
-                                        <a href="index.php?action=delete&id=<?= $slide['id'] ?>" class="btn btn-sm btn-outline-danger">حذف</a>
+                                        <a href="index.php?action=delete&id=<?= $slide['id'] ?>"
+                                            class="btn btn-sm btn-outline-danger">حذف</a>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php else : ?>
+                    <?php else: ?>
                         <div class="col">
                             <div class="alert alert-danger">
                                 اسلایدی یافت نشد ....
@@ -150,4 +157,4 @@ $slides = $db->query("SELECT * FROM slides ORDER BY id DESC");
 
 <?php
 include "./include/layout/footer.php"
-?>
+    ?>
