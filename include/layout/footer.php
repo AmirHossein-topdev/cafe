@@ -20,8 +20,9 @@
         $('.add-to-cart').on('click', function () {
             var postId = $(this).data('post-id');
             var stock = parseInt($(this).data('stock'));
-
-            if (stock === 0) {
+            var is_stock_tracked = parseInt($(this).data('is-stock-tracked'));
+			
+            if (is_stock_tracked === 1 && stock === 0) {
                 Swal.fire({
                     icon: 'error',
                     title: 'ناموجود',
@@ -71,9 +72,9 @@
             $('#iconNumber').text(cart.length);
         }
     });
+	
+
 </script>
-
-
 
 <!-- Initialize Swiper -->
 <script>

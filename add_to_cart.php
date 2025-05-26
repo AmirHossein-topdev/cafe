@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($post) {
         // چک موجودی
-        if ($post['stock'] <= 0) {
+        if ($post['is_stock_tracked'] == 1 && $post['stock'] <= 0) {
             echo json_encode(['status' => 'error', 'message' => 'محصول موجود نیست']);
             exit;
         }

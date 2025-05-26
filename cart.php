@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartItems'])) {
                     <input type="number" class="form-control text-center rounded-5" id="table_id"
                         placeholder="شماره میز" aria-describedby="addon-wrapping" required>
                 </div>
-                <button type="button" class="btn btn-dark">تایید</button>
+                <button type="button" class="btn btn-dark" id="main-button">تایید</button>
             </div>
         </section>
 
@@ -101,6 +101,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartItems'])) {
             <!-- محصولات سبد خرید در اینجا بارگذاری خواهند شد -->
         </div>
         <a href="./main.php" class="btn btn-secondary">بازگشت</a>
+        <!-- اضافه کردن دکمه یادداشت کنار سایر المان ها، در پایین چپ -->
+        <button id="openNoteBtn" class="btn btn-light rounded-3 position-fixed"
+            style="bottom: 20px; left: 20px; z-index: 1050;">
+            <i class="bi bi-journal-text fs-2 fw-bold"></i>
+        </button>
+
+        <!-- مودال یادداشت -->
+        <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="noteModalLabel">یادداشت میز</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="noteText" class="form-control" rows="5"
+                            placeholder="متن یادداشت خود را اینجا وارد کنید..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="saveNoteBtn" class="btn btn-success">ثبت</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
@@ -181,39 +207,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartItems'])) {
                 '<p class="text-center text-muted">سبد خرید شما خالی است.</p>';
         }
 
+
         // افزایش و کاهش تعداد محصول
         document.getElementById('cart-items-container').addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('change-quantity')) {
-                var postId = e.target.getAttribute('data-post-id'); // شناسه محصول
-                var action = e.target.getAttribute('data-action'); // افزایش یا کاهش
+                var postId = parseInt(e.target.getAttribute('data-post-id'));
+                var action = e.target.getAttribute('data-action');
 
-                // پیدا کردن محصول در سبد خرید
-                var cartItem = cartItems.find(item => item.postId === parseInt(postId));
+                var cartItem = cartItems.find(item => item.postId === postId);
                 if (!cartItem) return;
 
-                // افزایش یا کاهش تعداد
                 if (action === 'increase') {
                     cartItem.quantity += 1;
-                    location.reload();
                 } else if (action === 'decrease' && cartItem.quantity > 1) {
                     cartItem.quantity -= 1;
-                    location.reload();
-
                 }
 
-                // ذخیره‌سازی به‌روزرسانی شده در sessionStorage
+                // ذخیره‌سازی در sessionStorage
                 sessionStorage.setItem('cart', JSON.stringify(cartItems));
 
-                // به روز رسانی تعداد و قیمت محصول
+                // به‌روزرسانی تعداد در صفحه
                 document.getElementById('quantity-' + postId).innerText = cartItem.quantity;
-                var product = cartItems.find(item => item.postId === parseInt(postId));
-                var totalProductPrice = product.price * cartItem.quantity;
-                document.getElementById('total-product-price-' + postId).innerText = totalProductPrice.toLocaleString() + ' تومان';
 
-                // به روز رسانی مجموع قیمت
-                updateTotalPrice();
+                // پیدا کردن قیمت محصول
+                fetch('cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'cartItems=' + encodeURIComponent(JSON.stringify(cartItems))
+                })
+                    .then(response => response.json())
+                    .then(products => {
+                        let product = products.find(p => p.id === postId);
+                        if (product) {
+                            let totalProductPrice = product.price * cartItem.quantity;
+                            document.getElementById('total-product-price-' + postId).innerText = totalProductPrice.toLocaleString() + ' تومان';
+                            updateTotalPrice(products);
+                        }
+                    });
             }
         });
+
 
         // حذف محصول از سبد خرید
         document.getElementById('cart-items-container').addEventListener('click', function (e) {
@@ -237,14 +272,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartItems'])) {
         });
 
         // به روز رسانی مجموع قیمت بعد از تغییرات
-        function updateTotalPrice() {
+        function updateTotalPrice(products) {
             var totalPrice = 0;
             cartItems.forEach(item => {
-                var product = item.product; // فرض می‌کنیم محصول در cartItems ذخیره شده است
-                totalPrice += product.price * item.quantity;
+                let product = products.find(p => p.id === item.postId);
+                if (product) {
+                    totalPrice += product.price * item.quantity;
+                }
             });
             document.getElementById('total-price').innerText = 'مجموع: ' + totalPrice.toLocaleString() + ' تومان';
         }
+
 
     </script>
     <!-- add to cart -->
@@ -313,7 +351,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartItems'])) {
 
     </script>
 
+    <!-- modal -->
+    <script>
+        document.getElementById('openNoteBtn').addEventListener('click', function () {
+            const tableId = document.getElementById('table_id').value.trim();
+            if (!tableId || tableId <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'خطا',
+                    text: 'برای ثبت یادداشت، شماره میز الزامی است.',
+                });
+                return;
+            }
+            // باز کردن مودال یادداشت
+            var noteModal = new bootstrap.Modal(document.getElementById('noteModal'));
+            noteModal.show();
+        });
 
+        document.getElementById('saveNoteBtn').addEventListener('click', function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'یادداشت موقتا ثبت شد',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+            var noteModal = bootstrap.Modal.getInstance(document.getElementById('noteModal'));
+            noteModal.hide();
+        })
+        document.getElementById('main-button').addEventListener('click', function () {
+            const tableId = document.getElementById('table_id').value.trim();
+            const noteText = document.getElementById('noteText').value.trim();
+
+            if (!noteText) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'خطا',
+                    text: 'متن یادداشت نمی‌تواند خالی باشد.',
+                });
+                return;
+            }
+
+            // ارسال داده ها به سرور برای ذخیره در جدول note
+            fetch('save_note.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `table_id=${encodeURIComponent(tableId)}&note_text=${encodeURIComponent(noteText)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('noteText').value = '';
+                        var noteModal = bootstrap.Modal.getInstance(document.getElementById('noteModal'));
+                        noteModal.hide();
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'مشکلی در ارتباط با سرور رخ داد.',
+                    });
+                    console.error('Error:', error);
+                });
+        });
+
+    </script>
 </body>
 
 </html>
